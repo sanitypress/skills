@@ -17,21 +17,56 @@ This skill assumes the SanityPress schema (page, site, navigation, global-module
 
 ---
 
-## Phase 1 — Discovery (ask before building)
+## Phase 1 — Discovery (ask in this order, before building)
 
-Do not start building until you have these. If the user already supplied them, skip the question.
+Discovery is sequential **on purpose**: understand the business first, because the answers shape every later question and all the page copy. Do not jump ahead to colors/fonts before you understand what the site is for. Skip any question the user has already answered, and infer sensible defaults rather than asking about things the earlier answers already make obvious.
 
-1. **Brand / design direction.** If not provided, ask:
-   > What's the brand direction? (industry, tone, color palette, and any feel — e.g. "minimal luxury", "playful", "technical/editorial")
+**Run the steps one at a time and wait for confirmation at each.** Ask Step 1 and wait, then Step 2 and wait, and so on. Don't batch them or start building before each step is confirmed — each step's answers should visibly inform the next question/proposal. (Step 0 is the Phase 0 prerequisites check; confirm those before Step 1.)
 
-   From the answer, choose: `--color-background`, `--color-foreground`, `--color-primary`, a **body** Google Font (`--font-sans`) and a **heading** Google Font (`--font-serif`). Do not proceed without a direction — never invent a brand silently.
+**Thin brief?** If the user gives only a little (e.g. just a name, or "just build it"), don't stall and don't invent silently: infer a likely answer for the current step, present it as a concrete proposal, and move on once they confirm or adjust. Lead with the proposal, not a wall of questions.
 
-2. **Pages.** If not specified, ask which to include. Sensible baseline:
-   > Home, About, Destinations/Services, Packages/Pricing, FAQ, Contact (Blog optional)
+### Step 0 — Confirm technical prerequisites
+Before any discovery, confirm the Phase 0 prerequisites are met: Sanity MCP connected, target project id + dataset known, `get_schema` loaded. If not, resolve that first.
 
-   Confirm the list and the slug for each before building.
+### Step 1 — Tell me about the business
+Lead here so you can write real copy, not lorem ipsum, and so everything downstream follows from substance:
 
-3. Restate the plan (pages + slugs + chosen palette/fonts) in one short message, then build.
+> First, tell me about the business:
+> 1. **What is it?** Name + one line on what you do/sell.
+> 2. **Who's it for?** Target customer/audience.
+> 3. **What makes you different?** Selling points, offerings, or proof (stats, testimonials, clients) I can turn into real content.
+
+### Step 2 — Intent & primary call-to-action
+Now pin down what the site is *for* — this drives page priority, hero CTAs, and which `cta` themes/links to use:
+
+> What's the site meant to achieve?
+> 1. **Primary goal?** (e.g. get bookings, generate leads, sell products, build credibility, take signups)
+> 2. **Main call-to-action?** The single action you most want a visitor to take (e.g. "Book a call", "Request a quote", "Buy now") — and where it should point.
+> 3. Any secondary action? (optional)
+
+Make the primary CTA the dominant `cta` (`theme: 'action'`) in the hero and callout modules; secondary actions use `action-outline`/`ghost`/`link`.
+
+### Step 3 — Brand, design direction & tone
+Propose a direction derived from Steps 1–2 (business + intent), and confirm it:
+
+> Based on that, I'm thinking a **[proposed feel]** look with a **[tone]** voice — palette of **[BG/FG/PRIMARY]** and fonts **[heading] / [body]**. Run with this, or adjust?
+
+- **Tone of voice** (e.g. premium & understated, friendly & casual, bold & energetic, technical & precise) governs how all copy is written.
+- Map the visual answer to: `--color-background`, `--color-foreground`, `--color-primary`, a **body** Google Font (`--font-sans`) and a **heading** Google Font (`--font-serif`).
+- Recommend a fitting direction rather than asking open-endedly — but don't finalize a brand the user hasn't confirmed.
+
+### Step 4 — Confirm pages & copy
+Propose the page list (tailored to the business + primary goal, with a slug for each) **and a copy outline for each page** — the modules it'll use and the headline/key messages — so the user approves the actual words before anything is published:
+
+> Here's the plan — **[Home, About, Services, Pricing, FAQ, Contact]** (Blog optional). For each, here's the structure and draft copy:
+> - **Home:** hero "[headline]" → services → stats → testimonial → CTA …
+> - **About:** …
+>
+> Look good, or want changes to any page or wording?
+
+- Draft **genuine copy** in the chosen tone — never invent facts (prices, claims, testimonials, client names). Where a real detail is unknown, use a clearly-marked placeholder like `[ADD PRICING]` and list every such marker at the end.
+- Adjust the page set to what the business actually needs (e.g. drop Pricing for custom-quote lead-gen; add a Gallery for a visual brand).
+- Only after pages **and** copy are confirmed, proceed to build (Phases 2–5).
 
 ---
 
