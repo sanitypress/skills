@@ -1,5 +1,5 @@
 ---
-name: Build website
+name: build-website
 description: Build out a complete SanityPress website — all pages, content, navigation, and CSS — entirely through the Sanity MCP connector, using only existing modules. No code files are edited. Use when the user wants a full site created for a business/brand from a brief.
 ---
 
