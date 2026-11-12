@@ -39,6 +39,7 @@ Walk the block array **in order**. Transcribe verbatim — no paraphrasing, no r
 | `_type: 'code'` array member (`language`, `filename`, `code`) | fenced block, `` ```<language> ``. Put `filename` as a bold label on its own line above the fence — fences can't carry it, and the raw `.md` route has no renderer to display it otherwise. Never alter the `code` string itself. |
 | `_type: 'table'` array member (`rows[].cells[].value`, `headerRows`) | GFM pipe table. Each cell's `value` is Portable Text: convert it inline (marks and links per this table) and escape any `\|`. The first row is the header row (`headerRows` defaults to `1`); if `headerRows` is `0`, emit an empty header row. |
 | `_type: 'image'` array member | see Step 3 |
+| `_type: 'schema-markup'` array member | drop it — it's JSON-LD for search engines, not reader-facing content |
 | `_type: 'custom-html'` array member | drop it — raw script/widget embeds (comment widgets, analytics snippets) have no meaningful Markdown form, unless the user explicitly wants the raw HTML kept inline |
 
 ## Step 3 — Convert images to Sanity CDN links
@@ -64,7 +65,7 @@ Render as `![alt](url)`, using the image's own `alt` field. If it also has a `fi
 
 Unlike `blog.post.content`, each entry in `modules[]` has its own schema (`src/modules/*/schema.ts`) — there's no single field to walk mechanically. For each module, in document order:
 
-1. **Pull only reader-facing text.** Headings/intros (Portable Text, convert per Step 2), card/item titles and bodies, CTA labels + resolved hrefs, stat values/labels, accordion question/answer pairs, etc. Skip purely structural/visual fields — `attributes` (scoped CSS, `hidden`), layout options (`columns`, `theme`, `variant`, `size`) — and skip modules with no narrative content entirely (`breadcrumbs`, `search-module`'s non-heading chrome, decorative `logo-list`, `custom-html`).
+1. **Pull only reader-facing text.** Headings/intros (Portable Text, convert per Step 2), card/item titles and bodies, CTA labels + resolved hrefs, stat values/labels, accordion question/answer pairs, etc. Skip purely structural/visual fields — `attributes` (scoped CSS, `hidden`), layout options (`columns`, `theme`, `variant`, `size`) — and skip modules with no narrative content entirely (`breadcrumbs`, `search-module`'s non-heading chrome, decorative `logo-list`, `custom-html`, `schema-markup`).
 2. **Resolve internal links before rendering.** A `cta.link` or an inline link mark with `type: 'internal'` only carries `internal._ref` — it is not a usable href on its own. Fetch that referenced document's `_type` and `metadata.slug.current` and build the href:
    - `metadata.slug.current == 'index'` → `/`
    - `_type == 'blog.post'` → `/${ROUTES.blog}/<slug>` (blog path segment from `src/lib/env.ts`, default `'blog'`)

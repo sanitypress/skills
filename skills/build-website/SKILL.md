@@ -211,7 +211,7 @@ Why each line:
 ### Module-choice rules
 - **Never** create new module files or change schema. Compose from existing types only.
 - **`card-list` is the Swiss-army knife** — use it with `scopedCss` grids for bento/feature/team/pricing layouts.
-- **`custom-html`** is the last resort for genuinely custom UI. Never put `<style>` tags inside the `html` field — use the `css` field.
+- **`custom-html`** is the last resort for genuinely custom UI. Never put `<style>` tags inside the `html` field — use the `css` field. Never put JSON-LD `<script type="application/ld+json">` in it either — use a `schema-markup` module.
 
 ---
 
@@ -303,7 +303,8 @@ For each page create a `page` document. **Required:** `title` and `metadata.slug
 | `quote-list` | Testimonials | `eyebrow`, `intro`, `quotes[]` → **needs published `quote` docs**, `layout`, `columns` |
 | `form-module` | Contact / signup form | `eyebrow`, `intro`, `form` → **needs a `form` doc + real endpoint; otherwise use a mailto CTA** |
 | `breadcrumbs` | Breadcrumb nav | `crumbs[]`, `structuredDataOnly` |
-| `custom-html` | Page CSS / bespoke HTML | `html` (code), `css` (code), `className` |
+| `custom-html` | Page CSS / bespoke HTML | `html` (code), `css` (code), `className`. Not for JSON-LD (Studio warns): use `schema-markup` |
+| `schema-markup` | Structured data (JSON-LD) for search engines; renders nothing visible | `code` (code object, `language:'json'`): raw JSON with `@context` + `@type` (or `@graph`), **no `<script>` tag**. See "Structured data" |
 | `search-module` | On-page search | `eyebrow`, `intro`, `scope` |
 | `blog-index`, `blog-post-list` | Blog listing pages | auto-query published posts, no refs (only if Blog requested). `blog-index`: `intro`, optional `featured[]` post refs, `postsPerPage`. `blog-post-list`: `intro`, `ctas[]`, `limit` |
 
@@ -328,6 +329,27 @@ Each page should have **exactly one `h1`** — put it in the opening hero's `con
 - `site.ogimage` is the global social fallback (set once on the `site` doc).
 - **Add a `404` page:** `page` with slug `404`, a short `prose`/`hero.split` message + a CTA home, and `metadata.noIndex: true` (keeps it out of the sitemap). Optionally a `search` page if you use `search-module`.
 
+### Structured data (JSON-LD)
+Several modules already emit JSON-LD, so don't duplicate them by hand: `accordion-list` (`FAQPage`) and `step-list` (`HowTo`) when `enableSchema` is on, `person-list` (`Person`) for `person` docs with `enableSchema` on, `breadcrumbs` (`BreadcrumbList` microdata), and blog posts (`BlogPosting`, automatically via `blog-post-content`).
+
+For everything else, add a `schema-markup` module. At minimum, put one on the **home page** describing the business: `Organization`, or a `LocalBusiness` subtype (e.g. `Restaurant`, `Dentist`) for a physical location:
+
+```
+{ _type:'schema-markup', _key:'<k>',
+  code:{ _type:'code', language:'json', code: JSON.stringify({
+    '@context':'https://schema.org',
+    '@type':'Organization',
+    name:'[BUSINESS NAME]',
+    url:'https://[domain]',
+    logo:'https://cdn.sanity.io/images/<projectId>/<dataset>/<logo file>',
+    sameAs:[ /* the social nav URLs */ ]
+  }) } }
+```
+
+- Studio validates it: the `code` must be valid JSON, and every top-level node (or array item) needs `@context` plus `@type` or `@graph`. Never wrap it in a `<script>` tag.
+- Place it anywhere in `modules[]` (it renders only a `<script>`). It also works in a `global-module`'s `before[]`/`after[]` and in `blog.post` `content`.
+- **Facts only.** Include only properties you know (name, URL, logo, social links). Leave out unknown addresses, phone numbers, hours, prices and ratings rather than inventing them or using `[ADD …]` markers, and list them as follow-ups at the end. Never add `aggregateRating`/`review` from placeholder testimonials.
+
 ---
 
 ## Blog setup (only if the user said yes in Phase 1)
@@ -336,7 +358,7 @@ Skip this entirely unless a blog was requested. A working blog needs these, in o
 
 1. **`blog.category`** doc(s): `title` (slug auto-derives). At least one.
 2. **Author** — a published `person` doc (reuse the team docs or create one).
-3. **`blog.post`** doc(s): `title`, `content` (Portable Text — blocks, images w/ `alt`, CTAs, code, tables), `publishDate`, `categories[]` (refs to `blog.category`), `author` (ref to `person`), and `metadata` (`slug`, `title`, `description`, optional `image`). Posts live at `/blog/<slug>`.
+3. **`blog.post`** doc(s): `title`, `content` (Portable Text — blocks, images w/ `alt`, CTAs, code, tables, optional `schema-markup` for extra JSON-LD beyond the automatic `BlogPosting`), `publishDate`, `categories[]` (refs to `blog.category`), `author` (ref to `person`), and `metadata` (`slug`, `title`, `description`, optional `image`). Posts live at `/blog/<slug>`.
 4. **Post template** — a `global-module` with `path: 'blog/'` whose `before[]` (or `after[]`) contains a **`blog-post-content`** module. This is what actually renders each post's title/byline/content; without it, blog post pages are blank. `blog-post-content` may carry a `sidebar` (position + `tableOfContents`/`callout`/`custom-html`).
 5. **Blog index** (optional) — a `page` with slug `blog` containing a `blog-index` module (or `blog-post-list`). These auto-query all published posts, so no references are needed.
 
@@ -402,6 +424,7 @@ Styles: `normal`, `h1`–`h6`, `blockquote`. Bold/italic via `marks: ['strong']`
 - [ ] A brand `logo` was generated (matching palette + heading font) or supplied, published, and referenced from `site.logo`.
 - [ ] Titles formatted `"Main | Subtitle"`; a `404` page exists with `noIndex: true`; `site.ogimage` set.
 - [ ] Hero image is `eager` with `alt`; content images have `alt`; decorative images use `alt:''`.
+- [ ] Home page has a `schema-markup` module (`Organization` / `LocalBusiness`) with only known facts; no JSON-LD in `custom-html`, and nothing a module already emits via `enableSchema` is duplicated.
 - [ ] If a blog was requested: categories + author + posts + a `blog/` `global-module` with `blog-post-content` all exist and are published.
 - [ ] No new module/schema/code files were created. Every array member has a unique `_key`.
 - [ ] All non-empty docs published; empty-module pages left as drafts and reported.
